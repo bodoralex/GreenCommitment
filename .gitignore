@@ -1,0 +1,13 @@
+/out
+/.idea
+/bin/
+.mtj.tmp/
+*.class
+*.jar
+*.war
+*.ear
+.classpath
+.project
+*.iml
+hs_err_pid*
+
