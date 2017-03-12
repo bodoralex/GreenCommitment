@@ -9,10 +9,18 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class DataGenerator { // serialization
 	private final int minCons;
 	private final int maxCons;
-	private int cons;
+	private int consX;
+	private int consY;
 	private Random random;
 	private Socket socket;
 	private OutputStream outputStream;
@@ -21,7 +29,8 @@ public class DataGenerator { // serialization
 	public DataGenerator(int minCons, int maxCons) {
 		this.minCons = minCons;
 		this.maxCons = maxCons;
-		this.cons = (int) (minCons + maxCons) / 2;
+		this.consX = (int) (minCons + maxCons) / 3;
+		this.consY = (int) (minCons + maxCons) / 3;
 		random = new Random();
 	}
 
@@ -38,16 +47,34 @@ public class DataGenerator { // serialization
 	public void sendCurrentConsuption() {
 		getConsuption();
 		try {
-			objectOutput.writeObject(cons);
+			Document doc = createDoc();
+			objectOutput.writeObject(doc);
 		} catch (IOException e) {
 			System.err.println("IOException");
 			System.err.println(e.getMessage());
 			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			System.err.println("ParserConfigurationException");
+			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
-	public void connectTillSuccess(InetAddress ipAddress, int port){
+
+	private Document createDoc() throws ParserConfigurationException {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document doc = builder.newDocument();
+		Element rootelem = doc.createElement("measure");
+		doc.appendChild(rootelem);
+		Element rate = doc.createElement("rate");
+		rate.setAttribute("x", Integer.toString(consX));
+		rate.setAttribute("y", Integer.toString(consX));
+		return doc;
+	}
+
+	public void connectTillSuccess(InetAddress ipAddress, int port) {
 		boolean connected = false;
-		while(!connected){
+		while (!connected) {
 			connected = connectToServer(ipAddress, port);
 			try {
 				Thread.sleep(1000);
@@ -56,7 +83,8 @@ public class DataGenerator { // serialization
 			}
 		}
 	}
-	public void connectTillSuccess(String ipAddress, int port){
+
+	public void connectTillSuccess(String ipAddress, int port) {
 		connectTillSuccess(ipAddress, port);
 	}
 
@@ -81,12 +109,15 @@ public class DataGenerator { // serialization
 		return false;
 	}
 
-	public int getConsuption() {
+	public int[] getConsuption() {
 		refreshConsuption();
-		return cons;
+		return new int[]{consX, consY};
 	}
 
 	private void refreshConsuption() {
-		cons = random.nextInt(maxCons - minCons) + minCons;
+		consX = random.nextInt(maxCons - minCons) + minCons;
+		if(maxCons - consX >= minCons){
+			consY = random.nextInt(maxCons - consX) + minCons;
+		}
 	}
 }
