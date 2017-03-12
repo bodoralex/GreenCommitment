@@ -68,18 +68,23 @@ public class DataGenerator { // serialization
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document doc = builder.newDocument();
-		Element rootelem = doc.createElement("measure");
+		Element rootelem = doc.createElement(address);
 		doc.appendChild(rootelem);
-		Element rate = doc.createElement("rate");
-		Element x = doc.createElement("x");
-		x.setTextContent(Integer.toString(consX));
-		rate.appendChild(x);
-		Element y = doc.createElement("y");
-		y.setTextContent(Integer.toString(consY));
-		rate.appendChild(y);
+		
+		
 		Element date = doc.createElement("TimeStamp");
 		date.setTextContent(getDate());
-		rate.appendChild(date);
+		rootelem.appendChild(date);
+		
+		Element data = doc.createElement("Measurement");
+		rootelem.appendChild(data);
+		
+		Element x = doc.createElement("X");
+		x.setTextContent(Integer.toString(consX));
+		data.appendChild(x);
+		Element y = doc.createElement("Y");
+		y.setTextContent(Integer.toString(consY));
+		data.appendChild(y);
 
 		return doc;
 	}
